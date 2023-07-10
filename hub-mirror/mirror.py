@@ -3,6 +3,7 @@ import shutil
 import os
 
 import git
+import subprocess
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from utils import cov2sec
@@ -34,13 +35,18 @@ class Mirror(object):
             git.cmd.Git.polish_url(self.src_url), self.repo_path,
             kill_after_timeout=self.timeout
         )
+        print("Cloning LFS objects...")
+        subprocess.run(["git", "lfs", "install", "--local"], cwd=self.repo_path, check=True)
+        subprocess.run(["git", "config", "lfs.clone", "true"], cwd=self.repo_path, check=True)
+        subprocess.run(["git", "lfs", "pull"], cwd=self.repo_path, check=True)
         print("Clone completed: %s" % os.getcwd() + self.repo_path)
 
     @retry(wait=wait_exponential(), reraise=True, stop=stop_after_attempt(3))
     def _update(self, local_repo):
         try:
-            local_repo.git.pull(kill_after_timeout=self.timeout)
-        except git.exc.GitCommandError:
+            print('Running git lfs pull...')
+            subprocess.run(["git", "lfs", "pull"], cwd=self.repo_path, check=True)
+        except Exception as e:  # subprocess will raise an exception if the command fails
             # Cleanup local repo and re-clone
             print('Updating failed, re-clone %s' % self.src_name)
             shutil.rmtree(local_repo.working_dir)
@@ -79,7 +85,7 @@ class Mirror(object):
         try:
             local_repo.create_remote(self.hub.dst_type, self.dst_url)
         except git.exc.GitCommandError:
-            print("Remote exsits, re-create: set %s to %s" % (
+            print("Remote exists, re-create: set %s to %s" % (
                 self.hub.dst_type, self.dst_url))
             local_repo.delete_remote(self.hub.dst_type)
             local_repo.create_remote(self.hub.dst_type, self.dst_url)
@@ -89,8 +95,9 @@ class Mirror(object):
         ]
         if not self.force_update:
             print("(3/3) Pushing...")
-            local_repo.git.push(*cmd, kill_after_timeout=self.timeout)
+            local_repo.git.push(self.hub.dst_type, "HEAD")
+            subprocess.run(["git", "lfs", "push", "--all", self.hub.dst_type], cwd=self.repo_path, check=True)
         else:
             print("(3/3) Force pushing...")
-            cmd = ['-f'] + cmd
-            local_repo.git.push(*cmd, kill_after_timeout=self.timeout)
+            local_repo.git.push(self.hub.dst_type, "HEAD", force=True)
+            subprocess.run(["git", "lfs", "push", "--all", self.hub.dst_type], cwd=self.repo_path, check=True)
