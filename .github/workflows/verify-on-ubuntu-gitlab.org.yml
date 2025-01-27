@@ -1,0 +1,27 @@
+on:
+  push:
+  pull_request_target:
+    branches: [master]
+
+name: Tests / Mirror GitHub group to GitLab group
+
+jobs:
+  org-to-org-mirror:
+    name: Mirror GitHub Group to GitLab group
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v1
+
+      - name: Mirror GitHub Org to GitLab group
+        uses: ./.
+        with:
+          src: github/test-org-src
+          dst: gitlab/gitlab-mirror-test
+          src_account_type: "org"
+          dst_account_type: "group"
+          dst_key: ${{ secrets.GITLAB_PRIVATE_KEY }}
+          dst_token: ${{ secrets.GITLAB_TOKEN }}
+          clone_style: ssh
+          force_update: true
+          debug: true
