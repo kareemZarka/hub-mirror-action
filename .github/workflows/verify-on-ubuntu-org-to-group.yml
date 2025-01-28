@@ -1,0 +1,24 @@
+on:
+  push:
+  pull_request_target:
+    branches: [master]
+name: Tests / test-group-mirror
+jobs:
+  run:
+    name: Run
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v1
+    - name: Mirror Github to Gitlab
+      uses: ./.
+      with:
+        src: github/hub-mirror-action-test-git-hub
+        dst: gitlab/mirror_ci
+        dst_key: ${{ secrets.GITLAB_PRIVATE_KEY }}
+        dst_token: ${{ secrets.GITLAB_TOKEN }}
+        account_type: org
+        src_account_type: org
+        dst_account_type: group
+        force_update: true
+        debug: true
