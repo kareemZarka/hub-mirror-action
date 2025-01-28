@@ -3,7 +3,7 @@ on:
   pull_request_target:
     branches: [master]
 
-name: Tests / Mirror GitHub group to GitLab group
+name: Tests / Mirror GitHub org to GitLab group
 
 jobs:
   org-to-org-mirror:
@@ -23,5 +23,4 @@ jobs:
           dst_key: ${{ secrets.GITLAB_PRIVATE_KEY }}
           dst_token: ${{ secrets.GITLAB_TOKEN }}
           clone_style: ssh
-          force_update: true
           debug: true
