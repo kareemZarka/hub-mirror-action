@@ -17,7 +17,7 @@ jobs:
         uses: ./.
         with:
           src: github/test-org-src
-          dst: gitlab/gitlab-mirror-test
+          dst: gitlab/test-mirror-git-lab
           src_account_type: "org"
           dst_account_type: "group"
           dst_key: ${{ secrets.GITLAB_PRIVATE_KEY }}
