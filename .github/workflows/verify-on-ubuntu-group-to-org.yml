@@ -13,12 +13,12 @@ jobs:
     - name: Mirror Gilab to Github
       uses: ./.
       with:
-        src: gitlab/mirror_ci
-        dst: github/ci-mirror-test
+        src: gitlab/test-timeout-mirroring
+        dst: github/timeout-mirror-test
         dst_key: ${{ secrets.GIT_HUB_PRIVATE_KEY }}
         dst_token: ${{ secrets.GIT_HUB_TOKEN }}
-        account_type: group
         src_account_type: group
         dst_account_type: org
         force_update: true
         debug: true
+        api_timeout: 90
