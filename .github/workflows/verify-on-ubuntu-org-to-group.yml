@@ -22,4 +22,3 @@ jobs:
         dst_account_type: group
         force_update: true
         debug: true
-        api_timeout: 90
