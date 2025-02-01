@@ -1,0 +1,24 @@
+on:
+  push:
+  pull_request_target:
+    branches: [master]
+name: Tests / test-group-mirror
+jobs:
+  run:
+    name: Run
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v1
+    - name: Mirror Gilab to Github
+      uses: ./.
+      with:
+        src: gitlab/test-timeout-mirroring
+        dst: github/timeout-mirror-test
+        dst_key: ${{ secrets.GIT_HUB_PRIVATE_KEY }}
+        dst_token: ${{ secrets.GIT_HUB_TOKEN }}
+        src_account_type: group
+        dst_account_type: org
+        force_update: true
+        debug: true
+        api_timeout: 90
